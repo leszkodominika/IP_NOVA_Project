@@ -1,8 +1,11 @@
+
 ### CHURN MODELING - DATA SCIENCE PROJECT FOR INTRODUCTION TO PROGRAMMING #####
 ###############################################################################
 
 import numpy as np
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 import random 
 
 
@@ -13,11 +16,18 @@ import random
 
 ### 1. IMPORTING THE DATASET ##################################################
 
-dataset = pd.read_csv('Churn_Modelling.csv')
+dataset = pd.read_csv(r'C:\Users\dominika.leszko\Desktop\NOVA IMS\My_Python_Modules\Churn_Modelling.csv')
+
+#Checking general Data Frame information
+dataset.info()
+dataset.describe()
+dataset.isna().any()
+
+#No missing values -> creating some random missing values for the purpose of dealing with missing data (original data was co mplete)
+
 y = dataset.iloc[:, 13].values
 X = dataset.iloc[:, :-1].values
 
-#  Deleting randomly some data (for purpose of showing techniques for dealing with missing data (original data was complete))
 a = np.shape(X)
 i=0
 for column in range(a[1]-1):
@@ -29,9 +39,12 @@ for column in range(a[1]-1):
         if i*j%random.randint(1000,2000)==0: # Generates few missing values per feature
             X[j,i] = ''
  
-### 2. HANDLING MISSING DATA   ################################################     
+### 2. HANDLING MISSING DATA   ################################################    
+        
             
 #   2.1 Replacing missing data in categorical variable my most common value
+            
+##DOMINIKA: Mode everywhere? Are we going to use different methods as in Data Mining? What us below 'a[0]-1' doing?
 from statistics import mode
 
 for row in range(a[0]-1): #   3.2 Handling missing data in Geography
@@ -52,11 +65,14 @@ for row in range(a[0]-1): #   3.5 Handling missing data in IsActive
 
 
 #   2.2 Replacing missing data in countinous variable with mean of column
+        
+        #DOMINIKA: Can we change these numbers to column names? Its hard to understand such code
 from sklearn.preprocessing import Imputer
 
 df = pd.DataFrame(X)   # Tranfer to data frame to use df.where function        
 df = df.where(df!='')  # Replacing empty values with NaN
 X = df.iloc[:, 3:].values # Deleting unnecessary column (no logical input on outcome)
+
 
 imputer = Imputer(missing_values=np.nan, strategy = 'mean', axis = 0)
 imputer = imputer.fit(X[:,[0,3,4,5,6,9]])
@@ -65,14 +81,14 @@ X[:,[0,3,4,5,6,9]] = imputer.transform(X[:,[0,3,4,5,6,9]])
 #   for column age, tenure, num of prod we need to round number to integer (logic constraint)
 X[:,[3,4,6]] = X[:,[3,4,6]].astype(int)
 
-### 3 ENCODING CATEGORICAL VARIABLES FOR GEOGRAPHT AND GENDER
+### 3 ENCODING CATEGORICAL VARIABLES FOR GEOGRAPHY AND GENDER
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 labelEncoder1 = LabelEncoder()
 X[:,1] = labelEncoder1.fit_transform(X[:,1])
 labelEncoder2 = LabelEncoder()
 X[:,2] = labelEncoder2.fit_transform(X[:,2])
-onehotencoder = OneHotEncoder(categorical_features = [1])
+onehotencoder = OneHotEncoder(categorical_features = [1])# DOMINIKA: What is onehotencoder vs labelencoder?
 X = onehotencoder.fit_transform(X).toarray()
 
 ### 4 SPLITTING THE DATASET INTO TRAINING SET AND TEST SET ####################
@@ -267,4 +283,3 @@ a.describe()
 #plt.ylabel('PC2')
 #plt.legend()
 #plt.show()
-
